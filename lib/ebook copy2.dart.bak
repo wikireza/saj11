@@ -1,0 +1,693 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:video_player/video_player.dart';
+import 'materi_data.dart';
+import 'package:chewie/chewie.dart';
+import 'package:showcaseview/showcaseview.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'kuis_pg_page.dart';
+import 'pg_data.dart';
+
+class EbookPage extends StatefulWidget {
+  const EbookPage({super.key});
+
+  @override
+  State<EbookPage> createState() => _EbookPageState();
+}
+
+class InlineVideoPlayer extends StatefulWidget {
+  final String videoPath;
+  const InlineVideoPlayer({super.key, required this.videoPath});
+
+  @override
+  State<InlineVideoPlayer> createState() => _InlineVideoPlayerState();
+}
+
+class _InlineVideoPlayerState extends State<InlineVideoPlayer> {
+  late VideoPlayerController _videoController;
+  ChewieController? _chewieController;
+  final TransformationController _transformationController = TransformationController();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializePlayer();
+  }
+
+  Future<void> _initializePlayer() async {
+    _videoController = VideoPlayerController.asset(widget.videoPath);
+    await _videoController.initialize();
+
+    _chewieController = ChewieController(
+      videoPlayerController: _videoController,
+      autoPlay: false,
+      looping: false,
+      aspectRatio: _videoController.value.aspectRatio,
+      deviceOrientationsAfterFullScreen: [DeviceOrientation.portraitUp],
+      deviceOrientationsOnEnterFullScreen: [
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ],
+      customControls: const MaterialControls(), 
+    );
+    setState(() {});
+  }
+
+  void _resetZoom() {
+    _transformationController.value = Matrix4.identity();
+  }
+
+  @override
+  void dispose() {
+    _videoController.dispose();
+    _chewieController?.dispose();
+    _transformationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_chewieController == null || !_videoController.value.isInitialized) {
+      return const SizedBox(height: 200, child: Center(child: CircularProgressIndicator()));
+    }
+
+    return Column(
+      children: [
+        GestureDetector(
+          onDoubleTap: _resetZoom,
+          child: AspectRatio(
+            aspectRatio: _videoController.value.aspectRatio,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: InteractiveViewer(
+                transformationController: _transformationController,
+                clipBehavior: Clip.none,
+                minScale: 1.0,
+                maxScale: 4.0,
+                child: Chewie(controller: _chewieController!),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _EbookPageState extends State<EbookPage> {
+  final PageController _pageController = PageController();
+  bool _isDarkMode = false;
+  
+  // Flag untuk memastikan showcase hanya dipanggil sekali dan context sudah siap
+  bool _isFirstTime = true;
+  bool _isChecking = true;
+  bool _hasStarted = false;
+
+  // Kunci Showcase & Kunci Scaffold untuk Drawer
+  final GlobalKey _menuKey = GlobalKey();
+  final GlobalKey _homeKey = GlobalKey();
+  final GlobalKey _themeKey = GlobalKey();
+  final GlobalKey _pageViewKey = GlobalKey();
+  
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  final List<IconData> networkIcons = [
+    Icons.router,
+    Icons.cloud,
+    Icons.lan,
+    Icons.dns,
+    Icons.settings_input_component,
+    Icons.wifi,
+    Icons.security,
+    Icons.hub,
+    Icons.terminal,
+    Icons.storage,
+    Icons.file_download,
+  ];
+
+  String _getChapterTitle(int currentIndex) {
+    // Lakukan perulangan mundur untuk mencari judul bab utama
+    for (int i = currentIndex; i >= 0; i--) {
+      if (ebookData.containsKey(i) && ebookData[i]?["isHeader"] == true) {
+        return ebookData[i]?["title"] ?? "Materi";
+      }
+    }
+    return "Materi"; // Nilai default jika tidak ada bab di atasnya
+  }
+
+  //parser buat teks italic dengan format /i.../i
+  List<TextSpan> _buildSpansWithItalic(String text, TextStyle baseStyle, Color italicColor) {
+  final parts = text.split('/i');
+  List<TextSpan> spans = [];
+  
+  for (int i = 0; i < parts.length; i++) {
+    bool isItalic = i % 2 == 1; // Bagian ganjil adalah teks yang diapit oleh /i
+    spans.add(
+      TextSpan(
+        text: parts[i],
+        style: baseStyle.copyWith(
+          fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
+        ),
+      ),
+    );
+  }
+  return spans;
+}
+  
+  @override
+  void initState() {
+    super.initState();
+    _checkFirstInstall();
+  }
+
+  Future<void> _checkFirstInstall() async {
+    final prefs = await SharedPreferences.getInstance();
+    // Gunakan key unik agar tidak tertukar jika Google Backup merestore data
+    bool isFirstTime = prefs.getBool('is_first_time_showcase_v2') ?? true;
+
+    if (mounted) {
+      setState(() {
+        _isFirstTime = isFirstTime;
+        _isChecking = false;
+      });
+    }
+
+    if (isFirstTime) {
+      await prefs.setBool('is_first_time_showcase_v2', false);
+    }
+  }
+
+  @override
+  void dispose() {
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _toggleRotate() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+  }
+
+  @override
+Widget build(BuildContext context) {
+  Color bgColor = _isDarkMode ? const Color(0xFF121212) : Colors.grey[200]!;
+  Color appBarColor = _isDarkMode ? const Color(0xFF1F1F1F) : Colors.blueAccent;
+
+  return ShowCaseWidget(
+    builder: (context) {
+      // Menggunakan Builder untuk memastikan context sudah diturunkan dari ShowCaseWidget
+      return Builder(
+        builder: (context) {
+          
+          if (!_isChecking && _isFirstTime && !_hasStarted) {
+            _hasStarted = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                ShowCaseWidget.of(context).startShowCase([
+                  _menuKey,
+                  _homeKey,
+                  _themeKey,
+                  _pageViewKey,
+                ]);
+              }
+            });
+          }
+
+          return Scaffold(
+            key: _scaffoldKey,
+            backgroundColor: bgColor,
+            drawer: _buildSideMenu(appBarColor),
+            appBar: AppBar(
+              title: const Text(
+                "E-Modul SAJ",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              foregroundColor: Colors.white,
+              backgroundColor: appBarColor,
+              leading: Showcase(
+                key: _menuKey,
+                title: 'Menu Navigasi',
+                description: 'Ketuk di sini untuk membuka daftar isi materi.',
+                targetBorderRadius: BorderRadius.circular(8),
+                tooltipBackgroundColor: Colors.blueAccent,
+                textColor: Colors.white,
+                showArrow: true,
+                child: IconButton(
+                  icon: const Icon(Icons.menu),
+                  onPressed: () {
+                    _scaffoldKey.currentState?.openDrawer();
+                  },
+                ),
+              ),
+              flexibleSpace: ClipRect(
+                child: Stack(
+                  children: [
+                    Container(color: appBarColor),
+                    const Positioned(
+                      left: 40,
+                      top: 16,
+                      child: Opacity(
+                        opacity: 0.2,
+                        child: Icon(Icons.lan, size: 60, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                Showcase(
+                  key: _homeKey,
+                  title: 'Tombol Home',
+                  description: 'Gunakan tombol ini untuk kembali ke halaman awal aplikasi.',
+                  targetBorderRadius: BorderRadius.circular(8),
+                  tooltipBackgroundColor: Colors.blueAccent,
+                  textColor: Colors.white,
+                  showArrow: true,
+                  child: IconButton(
+                    icon: const Icon(Icons.home),
+                    onPressed: () {
+                      Navigator.popUntil(context, (route) => route.isFirst);
+                    },
+                  ),
+                ),
+                Showcase(
+                  key: _themeKey,
+                  title: 'Mode Tampilan',
+                  description: 'Ubah tema aplikasi menjadi mode gelap atau terang.',
+                  targetBorderRadius: BorderRadius.circular(8),
+                  tooltipBackgroundColor: Colors.blueAccent,
+                  textColor: Colors.white,
+                  showArrow: true,
+                  child: IconButton(
+                    icon: Icon(_isDarkMode ? Icons.light_mode : Icons.dark_mode),
+                    onPressed: () => setState(() => _isDarkMode = !_isDarkMode),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.lightbulb_outline),
+                  tooltip: 'Tampilkan Panduan',
+                  onPressed: () {
+                    ShowCaseWidget.of(context).startShowCase([
+                      _menuKey,
+                      _homeKey,
+                      _themeKey,
+                      _pageViewKey,
+                    ]);
+                  },
+                ),
+              ],
+            ),
+            body: Showcase(
+              key: _pageViewKey,
+              title: 'Area Baca Materi',
+              description: 'Geser layar ke kiri atau ke kanan untuk berpindah halaman.',
+              targetPadding: const EdgeInsets.all(5),
+              tooltipBackgroundColor: Colors.blueAccent,
+              textColor: Colors.white,
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: ebookData.length,
+                itemBuilder: (context, index) {
+                  final data = ebookData[index] ?? 
+                      {"title": "Halaman ${index + 1}", "isCover": false};
+                  return _buildPageUI(index, data);
+                },
+              ),
+            ),
+          );
+        }
+      );
+    }
+  );
+}
+  // --- Sisa Widget lainnya (Drawer, Cover, Main Content, dan lain-lain tidak berubah) ---
+  Widget _buildSideMenu(Color headerColor) {
+    List<int> headerIndexes = ebookData.keys.where((index) {
+      return ebookData[index]?["isHeader"] == true;
+    }).toList();
+
+    return Drawer(
+      backgroundColor: _isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+      child: Column(
+        children: [
+          _buildDrawerHeader(headerColor),
+          Expanded(
+            child: ListView.builder(
+              padding: EdgeInsets.zero,
+              itemCount: headerIndexes.length,
+              itemBuilder: (context, i) {
+                int actualIndex = headerIndexes[i];
+                final String title = ebookData[actualIndex]?["title"] ?? "Materi ${i + 1}";
+
+                return ListTile(
+                  dense: true,
+                  leading: Icon(
+                    Icons.label_important_outline,
+                    color: _isDarkMode ? Colors.blue[300] : Colors.blueAccent,
+                    size: 20,
+                  ),
+                  title: Text(
+                    title,
+                    style: TextStyle(
+                      color: _isDarkMode ? Colors.white70 : Colors.black87,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  onTap: () {
+                    _pageController.jumpToPage(actualIndex);
+                    Navigator.pop(context);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerHeader(Color color) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.only(top: 50, bottom: 20, left: 20, right: 20),
+      decoration: BoxDecoration(
+        color: color,
+        image: const DecorationImage(
+          image: AssetImage("assets/logounmul.png"),
+          opacity: 0.1,
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const CircleAvatar(
+            radius: 30,
+            backgroundColor: Colors.white,
+            child: Icon(Icons.lan, color: Colors.blueAccent, size: 30),
+          ),
+          const SizedBox(height: 15),
+          const Text(
+            "Daftar Isi Materi",
+            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          Text(
+            "Sistem Administrasi Jaringan",
+            style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPageUI(int index, Map<String, dynamic> data) {
+    Color cardColor = _isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
+    Color textColor = _isDarkMode ? Colors.white.withOpacity(0.7) : Colors.black87;
+    Color titleColor = _isDarkMode ? Colors.blue[300]! : Colors.blueAccent;
+    Color iconColor = _isDarkMode ? Colors.white.withOpacity(0.04) : Colors.blueGrey.withOpacity(0.07);
+
+    bool isCover = data["isCover"] ?? false;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 400),
+      margin: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: _isDarkMode ? Colors.black54 : Colors.black12,
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(15),
+        child: Stack(
+          children: [
+            Positioned(
+              top: -30, right: -30,
+              child: Icon(networkIcons[index % networkIcons.length], size: 200, color: iconColor),
+            ),
+            Positioned(
+              bottom: -40, left: -20,
+              child: Transform.rotate(
+                angle: 0.5,
+                child: Icon(networkIcons[(index + 1) % networkIcons.length], size: 150, color: iconColor),
+              ),
+            ),
+            isCover
+                ? _buildCoverLayout(data, titleColor, textColor)
+                : _buildMainContent(index, data, titleColor, textColor),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLocalVideoBox(String videoPath, String thumbnailPath) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, blurRadius: 5, offset: Offset(0, 3))
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: InlineVideoPlayer(videoPath: videoPath),
+      ),
+    );
+  }
+
+  Widget _buildVideoBox(String url) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 15),
+      height: 190,
+      decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(12)),
+      child: Stack(
+        children: [
+          Center(child: Image.network(url, fit: BoxFit.cover, width: double.infinity)),
+          const Center(child: Icon(Icons.play_circle_fill, color: Colors.white, size: 50)),
+          Positioned(
+            bottom: 5, right: 5,
+            child: IconButton(
+              icon: const Icon(Icons.fullscreen, color: Colors.white), 
+              onPressed: _toggleRotate,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMainContent(int index, Map<String, dynamic> data, Color titleColor, Color textColor) {
+    return Stack(
+      children: [
+        Positioned(
+          left: 0, top: 0, bottom: 0,
+          child: Container(width: 6, color: titleColor.withOpacity(0.3)),
+        ),
+        Padding(
+          
+          padding: const EdgeInsets.fromLTRB(25, 25, 25, 45),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                data["title"] ?? _getChapterTitle(index),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: titleColor),
+              ),
+              Divider(height: 30, color: _isDarkMode ? Colors.white10 : Colors.black12),
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: (data["elements"] as List<dynamic>?)?.map((item) {
+                        if (item["type"] == "shortcut_kuis") {
+                        // Ambil index kuis langsung dari data element materi_data.dart, fallback ke 0 jika tidak ada
+                        final int quizIndex = item["quizIndex"] ?? 0;
+
+                        return Container(
+                          margin: const EdgeInsets.symmetric(vertical: 20),
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              // Pengecekan keamanan untuk memastikan data kuis ada di pg_data.dart
+                              if (QuizData.soalKuis.containsKey(quizIndex)) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => KuisPGPage(modulIndex: quizIndex),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Kuis untuk bab ini belum tersedia.')),
+                                );
+                              }
+                            },
+                            icon: const Icon(Icons.assignment_turned_in, color: Colors.white),
+                            label: const Text(
+                              "Uji Pemahaman: Latihan Pilihan Ganda",
+                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orangeAccent,
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              elevation: 3,
+                            ),
+                          ),
+                        );
+                      }
+
+                      if (item["type"] == "h2") {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 10, bottom: 10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            RichText(
+                              text: TextSpan(
+                                children: _buildSpansWithItalic(
+                                  item["value"],
+                                  TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: _isDarkMode ? Colors.blue[200] : Colors.blueGrey[800],
+                                    letterSpacing: 0.5,
+                                  ),
+                                  titleColor, // Digunakan untuk parameter fungsi, warna miring akan menyesuaikan
+                                ),
+                              ),
+                            ),
+                            Container(
+                              margin: const EdgeInsets.only(top: 4),
+                              height: 2,
+                              width: 40,
+                              color: titleColor,
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                      
+                      else if (item["type"] == "text") {
+                        String text = item["value"];
+                        RegExp regExp = RegExp(r'^(\d+\.\s)'); 
+                        Match? match = regExp.firstMatch(text);
+
+                        if (match != null) {
+                          String leadingNumber = match.group(0)!;
+                          String remainingText = text.substring(leadingNumber.length);
+
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  width: 25,
+                                  child: Text(leadingNumber, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: titleColor)),
+                                ),
+                                Expanded(
+                                  child: RichText(
+                                    textAlign: TextAlign.justify,
+                                    text: TextSpan(
+                                      children: _buildSpansWithItalic(
+                                        remainingText,
+                                        TextStyle(fontSize: 16, height: 1.6, color: textColor),
+                                        titleColor,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        } else {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 15),
+                            child: Text(
+                              text,
+                              textAlign: TextAlign.justify,
+                              style: TextStyle(fontSize: 16, height: 1.6, color: textColor),
+                            ),
+                          );
+                        }
+                      } else if (item["type"] == "image") {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 15),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.asset(item["value"], fit: BoxFit.contain),
+                          ),
+                        );
+                      } else if (item["type"] == "video_asset") {
+                        return _buildLocalVideoBox(item["value"], item["thumbnail"] ?? "");
+                      } else if (item["type"] == "video") {
+                        return _buildVideoBox(item["value"]);
+                      }
+                      return const SizedBox.shrink();
+                    }).toList() ?? [],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Positioned(
+          bottom: 15, right: 20,
+          child: Text("Hal. ${index + 1}", style: TextStyle(color: textColor.withOpacity(0.5), fontWeight: FontWeight.bold)),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCoverLayout(Map<String, dynamic> data, Color titleColor, Color textColor) {
+    bool hasText = data["title"] != null || data["content"] != null;
+    return Column(
+      children: [
+        Expanded(
+          flex: hasText ? 3 : 1,
+          child: Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 43, 163, 210),
+              image: DecorationImage(
+                image: AssetImage(data["coverAsset"] ?? "assets/cover.png"),
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+        ),
+        if (hasText)
+          Expanded(
+            flex: 1,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (data["title"] != null)
+                    Text(data["title"]!, textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: titleColor)),
+                  if (data["content"] != null) ...[
+                    const SizedBox(height: 10),
+                    Text(data["content"]!, textAlign: TextAlign.center, style: TextStyle(color: textColor)),
+                  ],
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}

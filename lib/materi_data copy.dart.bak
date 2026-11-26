@@ -1,0 +1,255 @@
+import 'pg_data.dart';
+
+final Map<String, String> kamusSaj = {
+  "user interface": "Tampilan visual yang menghubungkan pengguna dengan sistem komputer.",
+  "VirtualBox": "VirtualBox adalah perangkat lunak virtualisasi /iopen-source/i (gratis) yang dikembangkan oleh /iOracle/i untuk membuat dan menjalankan sistem operasi /i(OS)/i tambahan—disebut /ivirtual machine (VM)/i—di dalam komputer utama /i(host)/i. Ini memungkinkan murid menjalankan /iWindows, Linux,/i atau /imacOS/i secara bersamaan tanpa /idual boot/i",
+  "Hyper-V": "Fitur virtualisasi bawaan Windows untuk membuat mesin virtual.",
+  "ISO": "Format file arsip yang berisi salinan identik dari data pada cakram optik.",
+  "Hyper-V, VT-x, AMD-V, SVM": "Adalah teknologi inti untuk virtualisasi perangkat keras yang memungkinkan satu komputer menjalankan beberapa sistem operasi atau emulator (seperti /iAndroid/i) secara bersamaan. /iIntel VT-x/i dan /iAMD-V/SVM/i adalah fitur /iCPU/i untuk virtualisasi, sementara /iHyper-V/i adalah platform /ihypervisor/i dari /iMicrosoft/i yang membutuhkannya.",
+ 
+ 
+  
+};
+
+final Map<int, Map<String, dynamic>> ebookData = {
+  0: 
+  {
+    "isCover": true, // Penanda khusus cover
+    "coverAsset": "assets/cover.png", // Jalur file asset
+  },
+  1: 
+  {
+    "title": "Kata Pengantar",
+    "hasVideo": false,
+    "isHeader": true,
+    "elements": [{"type": "text", "value": '''Puji syukur kami panjatkan ke hadirat Tuhan Yang Maha Esa, karena atas rahmat dan karunia-Nya, penyusunan laporan/modul mata pelajaran Sistem Administrasi Jaringan (SAJ) ini dapat terselesaikan dengan baik.
+
+      Dalam semangat Kurikulum Merdeka, pembelajaran SAJ tidak hanya berfokus pada penguasaan teori, tetapi juga pada pengembangan kemandirian, kreativitas, dan kemampuan /iproblem-solving/i dalam mengelola infrastruktur jaringan. Materi yang disajikan dalam dokumen ini dirancang untuk membekali siswa dengan keterampilan praktis dalam mengonfigurasi, memelihara, dan mengamankan sistem operasi jaringan serta layanan server yang relevan dengan kebutuhan industri saat ini.
+
+      Penyusun menyadari bahwa dinamika teknologi informasi berkembang sangat pesat. Oleh karena itu, laporan ini disusun sebagai langkah awal untuk memicu rasa ingin tahu /i(curiosity)/i dan kemampuan belajar sepanjang hayat /i(lifelong learning)/i. Kami berharap materi ini dapat menjadi referensi yang bermanfaat dalam memahami kompleksitas administrasi jaringan, mulai dari manajemen user, konfigurasi /iDNS/i, /iWeb Server/i, hingga aspek keamanan sistem.
+
+      Ucapan terima kasih kami sampaikan kepada guru pembimbing, rekan sejawat, dan semua pihak yang telah membantu dalam proses praktikum dan penyusunan laporan ini. Kritik dan saran yang membangun sangat kami harapkan guna penyempurnaan di masa mendatang.
+
+      Semoga karya ini dapat memberikan kontribusi positif bagi kemajuan pendidikan vokasi di Indonesia.'''},
+      
+      
+      ] 
+  },
+
+  2: {
+    "title": "PEMAHAMAN BERMAKNA",
+    "isHeader": true,   
+    "elements": [
+      {"type": "text", "value": "Melalui pembelajaran yang kolaboratif, peserta didik dapat memahami:"},
+      {"type": "text", "value": "1. Konsep dasar sistem operasi jaringan dan fungsinya dalam infrastruktur TI."},
+      {"type": "text", "value": "2. Instalasi sistem operasi jaringan menggunakan aplikasi /iVirtualBox./i"},
+      {"type": "text", "value": "3. Konfigurasi dasar layanan jaringan pada sistem operasi."}, // Contoh pengganti duplikat
+      {"type": "text", "value": "4. Instalasi dan konfigurasi /iDNS Server/i."},
+    ],
+  },
+
+  3: { // Halaman 4
+    "title": "BAB 1: Sistem Operasi Jaringan",
+    "isHeader": true,
+    "elements": [
+      {"type": "image", "value": "assets/sistem_jaringan.png"},
+      {
+        "type": "text", "value": '''Sistem operasi memiliki peranan penting saat ini dalam mendukung perkembangan
+        teknologi informasi. Ini karena hampir semua aplikasi yang dikembangkan saat ini berjalan
+        diatas diatas sistem operasi. Sistem operasi merupakan sebuah program yang
+        mengendalikan semua fungsi yang ada pada komputer. Sistem operasi menjadi basis
+        landasan pengembangan aplikasi untuk user.\n Secara umum semua sistem operasi memiliki mpat fungsi berikut.
+        - Pengendalian akses terhadap berbagai perangkat keras yang terhubung ke komputer.
+(Manajemen perangkat keras)
+        - Pengelolaan file dan folder (Manajemen file dan folder)
+        - Penyediaan /iuser interface/i sebagai jembatan antar user dengan perangkat keras
+        komputer (Manajemen interaksi user)
+        Pengelolaan aplikasi /iuser/i (Manajemen aplikasi)'''
+    },      
+    ],
+  },
+  
+  4: {
+    "title": "BAB 2: Instalasi Sistem Operasi",
+    "isHeader": true,
+    "elements": [
+      {
+        "type": "video_asset",
+        "value": "assets/videos/down1.mp4",
+        "isAsset": true
+      },
+      {"type": "h2", "value": "Persiapan Instalasi Sistem Operasi Linux Debian 12"},
+      {"type": "text", "value": "Berikut  langkah instalasi Sistem Operasi Debian"},
+      {"type": "text", "value": "1. Mempersiapkan aplikasi /iVirtualBox/i untuk simulasi instalasi sistem operasi jaringan. serta aktivasi pendukung Virtualisasi baik /iHyper-V, VT-x, AMD-V, SVM/i, atau lainnya sesuai dengan jenis prosesor yang digunakan."},
+      {"type": "text", "value": "2. Melalui /ibrowser/i mencari file /iISO DVD Debian 12/i versi stabil untuk Instalasi virtual berbasis /iVirtualBox/i melalui situs resmi (https://www.debian.org/distrib/) "},
+      {"type": "text", "value": "3. File instalasi Debian '... amd64.iso' dikhususkan untuk arsitektur /i64-bit/i, sedangkan '... i386.iso' untuk arsitektur 32-bit. Pastikan memilih /ifile ISO/i yang sesuai dengan jenis prosesor yang digunakan."},
+
+    ]
+  },
+
+  5: { 
+  "elements": [
+    {
+      "type": "video_asset",
+      "value": "assets/videos/instal1.mp4",
+      "isAsset": true
+    },
+    {"type": "h2", "value": "Konfigurasi Awal /iVirtualBox/i"},
+    {"type": "text", "value": "Berikut  langkah instalasi Sistem Operasi Debian"},
+    {"type": "text", "value": "1. Buat mesin virtual baru di VirtualBox dengan nama 'Debian 12' atau lainnya sesuai keinginan namun cocokkan versi hingga /idistribution OS/i sesuai dengan Linux Debian 12"},
+    {"type": "text", "value": "2. Untuk 'Unattended installation' digunakan untuk melewati parameter konfigurasi awal instalasi hingga proses pembuatan GRUB selesai. namun untuk saat ini bisa di /iuncheck/i saja "},
+    {"type": "text", "value": "3. Atur /iVirtual hardware/i seperti penggunaan /iRAM/i dan /iCPU/i sesuai kebutuhan minimum agar proses instalasi hingga pemakaian sistem operasi berjalan lancar"},
+    {"type": "text", "value": "4. Simpan pengaturan yang telah dikonfigurasi tersebut"},
+
+  ]
+  },
+
+  6: { 
+   "elements": [
+    {
+      "type": "video_asset",
+      "value": "assets/videos/install2.mp4",  
+      "isAsset": true
+    },
+    {"type": "h2", "value": "Konfigurasi Awal /iVirtualBox/i"},
+    {"type": "text", "value": "1. Sebelum memulai proses, konfigurasikan Perangkat /ivirtual network/i dengan mempersiapkan 1 /ivirtual host adapter/i untuk mengisolasi jaringan virtual agar aman untuk simulasi dan komunikasi beberapa antar mesin virtual nantinya."},
+    {"type": "text", "value": "2. Untuk adapter kedua bisa memakai /iBridged Adapter/i atau /iNAT/i untuk kebutuhan akses Internet secara langsung "},
+    ],
+  },
+
+  7: { 
+   "elements": [
+    {
+      "type": "video_asset",
+      "value": "assets/videos/install3.mp4",  
+      "isAsset": true
+    },
+    {"type": "text", "value": "1. Pilih /igraphical install/i atau /iinstall/i saja untuk instalasi berbasis /iCLI/i murni. Opsi ini hanya berlaku untuk proses instalasi dan tidak mempengaruhi opsi /ienvironment/i Sistem Operasi /i(GUI/CLI)/i yang ingin dipasang nantinya. untuk saat ini kita pilih install saja agar lebih cepat prosesnya"},
+    {"type": "text", "value": "2. Konfigurasikan Bahasa, Lokasi, dan Tata Letak Keyboard sesuai dengan preferensi murid. Pastikan memilih opsi yang sesuai agar proses instalasi berjalan lancar. "},
+    ],
+  },
+
+  8: { 
+   "elements": [
+    {
+      "type": "video_asset",
+      "value": "assets/videos/install4net.mp4",  
+      "isAsset": true
+    },
+    {"type": "h2", "value": "Konfigurasi network adapter /iVirtualBox/i"},
+    {"type": "text", "value": "1. Pilih opsi pertama /ienp0s3/i atau /ieth0/i berdasarkan /idriver virtual host only adapter/i yang telah terpasang sebagai /iprimary network interface/i "},
+    {"type": "text", "value": "2. lewati opsi /idefault route/i untuk sementara dengan memilih 'No' dan /ido not configure the network at this time./i Kita akan melakukan konfigurasi jaringan setelah instalasi selesai agar lebih mudah dan fleksibel dalam penyesuaian kebutuhan jaringan virtual yang akan dibuat nantinya."},
+    ],
+  },
+
+  9: { 
+    "elements": [
+      {
+        "type": "video_asset",
+        "value": "assets/videos/install5acc.mp4",  
+        "isAsset": true
+      },
+      {"type": "h2", "value": "Konfigurasi Akun Pengguna"},
+      {"type": "text", "value": "1. Masukkan nama pengguna utama /i(hostname)/i untuk akun /iadministrator (root)/i dan buat kata sandi yang kuat untuk keamanan sistem. lakukan hal yang sama pada untuk pembuatan /inew user/i baik dari /ifullname/i untuk nama panjang dan juga /ipassword/i lalu verifikasi kembali. Pastikan untuk mengingat informasi ini karena akan diperlukan untuk mengelola sistem operasi jaringan setelah instalasi selesai."},
+      {"type": "text", "value": "2 Pilih /itimezone/i yang sesuai dengan lokasi murid untuk memastikan waktu sistem operasi jaringan berjalan dengan benar. "},
+      ],
+    },
+
+    10: { 
+    "elements": [
+      {
+        "type": "video_asset",
+        "value": "assets/videos/install6partisi.mp4",  
+        "isAsset": true
+      },
+      {"type": "h2", "value": "Konfigurasi Partisi"},
+      {"type": "text", "value": "1. Atur Partisi /iDisk untuk Sistem Operasi Jaringan Debian 12. Pilih opsi /i'Guided - use entire disk'/i untuk menggunakan seluruh ruang disk yang tersedia. Pastikan untuk memilih disk yang benar jika ada lebih dari satu /idisk/i yang terpasang."},
+      {"type": "text", "value": "2.  Pada /iGuided - u/ise entire disk,/i Proses akan secara otomatis membuat partisi yang diperlukan untuk sistem operasi jaringan, termasuk partisi /iroot/i (/) dan /iswap/i. Pastikan untuk meninjau konfigurasi partisi sebelum melanjutkan dengan instalasi."},
+      ],
+    },
+
+    11: { 
+    "elements": [
+      {
+        "type": "video_asset",
+        "value": "assets/videos/install7environt.mp4",  
+        "isAsset": true
+      },
+      {"type": "h2", "value": "Opsi Environment Sistem Operasi Jaringan"},
+      {"type": "text", "value": "1. Hapus centang pada Debian desktop environment dan GNOME (GNU Network Object Model Environment). Opsi ini akan memastikan bahwa sistem operasi jaringan yang terpasang hanya memiliki antarmuka baris perintah (CLI) tanpa lingkungan desktop grafis (GUI). "},
+      {"type": "text", "value": "2. Pasang GRUB boot loader pada Master Boot Record (MBR) untuk memastikan sistem operasi  dapat booting dengan benar setelah instalasi selesai. Pilih opsi 'Yes' untuk melanjutkan dengan pemasangan GRUB."},
+      {"type": "text", "value": "3. Pasang GRUB pada disk utama (biasanya /idev/sda/i) untuk memastikan bahwa sistem operasi jaringan dapat booting dengan benar setelah instalasi selesai. Pilih disk yang benar jika ada lebih dari satu /idisk/i yang terpasang."},
+      {"type": "text", "value": "4. Setelah semua konfigurasi selesai, pilih opsi 'Continue' untuk memulai proses instalasi. Proses ini akan memakan waktu beberapa menit tergantung pada kecepatan sistem dan media instalasi yang digunakan."},
+      {"type": "text", "value": "5. Instalasi selesai, pilih opsi 'Continue' untuk me-reboot mesin virtual dan masuk ke sistem operasi jaringan Debian 12 yang baru saja diinstal."},
+    {"type": "shortcut_kuis","quizIndex": 0,},
+      ],
+    },
+
+   12: { 
+    "title": "BAB 3: Konfigurasi DHCP Server",
+    "isHeader": true,
+       "elements": [
+        {"type": "video_asset",
+        "value": "assets/videos/install7environt.mp4",  
+        "isAsset": true },
+
+      {"type": "text", "value": "Update repositori sudo apt update" }, 
+      {"type": "text", "value": "Atur IP statis pada interface (misal: eth0 atau enp0s3) melalui file /etc/network/interfaces atau menggunakan nmcli" },
+      {"type": "text", "value": "Gunakan perintah berikut untuk menginstal paket utama sudo apt install isc-dhcp-server" },
+      {"type": "text", "value": "Catatan: Jangan panik jika muncul pesan failed saat instalasi selesai. Hal ini wajar karena servis mencoba berjalan namun belum dikonfigurasi." },
+      {"type": "text", "value": "Edit file konfigurasi DHCP yang terletak di /etc/dhcp/dhcpd.conf sesuai kebutuhan jaringan . Contoh konfigurasi dasar:\n subnet "},
+      {"type": "text", "value": "Restart layanan DHCP server untuk menerapkan perubahan konfigurasi dengan perintah sudo systemctl restart isc-dhcp-server" },
+      {"type": "text", "value": "Verifikasi status layanan DHCP server dengan perintah sudo systemctl status isc-dhcp-server untuk memastikan bahwa layanan berjalan dengan baik tanpa error." },
+      
+    ],
+  },
+
+  13: { 
+    "title": "Konfigurasi FTP Server",
+    "isHeader": false,
+      "elements": [
+      {"type": "text", "value": '''1. Jelaskan pengertian sistem operasi jaringan dan sebutkan fungsinya!'''}, 
+      {"type": "text", "value": '''2. Sebutkan langkah-langkah instalasi sistem operasi jaringan menggunakan VirtualBox!'''},
+      {"type": "text", "value": '''3. Bagaimana cara mengkonfigurasi layanan DHCP pada sistem operasi jaringan?'''},       
+      
+    ],
+  },
+
+  14: { 
+    "title": "Video Pembelajaran: Konfigurasi Jaringan & Server",
+    "isHeader": false,
+    "elements": [
+      {
+        "type": "video_youtube",
+        "value": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "title": "Tutorial Konfigurasi Jaringan & Server",
+      },
+      {"type": "text", "value": '''Silakan simak video penjelasan di atas mengenai konsep dan konfigurasi server jaringan.'''},
+      {"type": "text", "value": '''1. Jelaskan pengertian sistem operasi jaringan dan sebutkan fungsinya!'''}, 
+      {"type": "text", "value": '''2. Sebutkan langkah-langkah instalasi sistem operasi jaringan menggunakan VirtualBox!'''},
+      {"type": "text", "value": '''3. Bagaimana cara mengkonfigurasi layanan DHCP pada sistem operasi jaringan?'''},       
+    ],
+  },
+
+   15: { // Halaman 6 (Index 5)
+    "title": "BAB 3: Konfigurasi DHCP Server",
+    "hasVideo": true, // Masih ada video karena materi bersambung
+    "videoUrl": "https://www.howtoforge.com/images/install_and_configure_isc_dhcp_server_in_debian_9/Debian_9_LEMP-2017-09-10-17-54-49.png",
+    "isHeader": true,
+    "elements": [
+      {
+        "type": "video",
+        "value": "https://www.howtoforge.com/images/install_and_configure_isc_dhcp_server_in_debian_9/Debian_9_LEMP-2017-09-10-17-54-49.png", // file Anda
+        "isAsset": true // Tambahkan penanda ini
+      },
+      {"type": "h2", "value": "Persiapan Konfigurasi DHCP Server"},
+      {"type": "text", "value": "Berikut langkah-langkah konfigurasi DHCP Server pada sistem operasi jaringan Debian:"},
+      {"type": "text", "value": "1. Instalasi Paket DHCP Server:\n Gunakan perintah berikut untuk menginstal paket DHCP server:\n sudo apt-get update\n sudo apt-get install isc-dhcp-server"},
+      {"type": "text", "value": "2. Konfigurasi File dhcpd.conf:\n Edit file konfigurasi DHCP yang terletak di /etc/dhcp/dhcpd.conf sesuai kebutuhan jaringan. Contoh konfigurasi dasar:\n subnet"},
+      {"type": "shortcut_kuis","quizIndex": 1,},
+    ]
+  },
+
+  
+
+};

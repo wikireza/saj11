@@ -1,0 +1,221 @@
+import 'package:flutter/material.dart';
+
+class KuisPGPage extends StatefulWidget {
+  const KuisPGPage({super.key});
+
+  @override
+  State<KuisPGPage> createState() => _KuisPGPageState();
+}
+
+class _KuisPGPageState extends State<KuisPGPage> {
+  int _activeQuestionIndex = 0;
+  int _score = 0;
+  int? _selectedAnswerIndex;
+  bool _isFinished = false;
+
+  final List<Map<String, dynamic>> _quizQuestions = [
+    {
+      "soal": "Apa fungsi utama dari DHCP Server dalam jaringan?",
+      "pilihan": [
+        "Membagi-bagikan IP address secara otomatis ke client",
+        "Menerjemahkan domain menjadi IP Address",
+        "Mengatur lalu lintas data antar jaringan",
+        "Membatasi hak akses pengguna"
+      ],
+      "jawabanIndex": 0,
+      "penjelasan": "DHCP (Dynamic Host Configuration Protocol) bertugas untuk mendistribusikan IP address secara otomatis kepada perangkat dalam jaringan."
+    },
+    {
+      "soal": "Perintah apa yang digunakan untuk menginstal paket layanan DHCP Server di Debian?",
+      "pilihan": [
+        "apt-get install apache2",
+        "apt-get install isc-dhcp-server",
+        "apt-get install bind9",
+        "apt-get install vsftpd"
+      ],
+      "jawabanIndex": 1,
+      "penjelasan": "'isc-dhcp-server' adalah nama paket yang digunakan sebagai DHCP Server pada sistem operasi Debian/Ubuntu."
+    },
+    {
+      "soal": "File konfigurasi utama pada jaringan untuk mengatur IP address di Debian adalah...",
+      "pilihan": [
+        "/etc/network/interfaces",
+        "/etc/dhcp/dhcpd.conf",
+        "/etc/resolv.conf",
+        "/etc/vsftpd.conf"
+      ],
+      "jawabanIndex": 0,
+      "penjelasan": "Secara default, file /etc/network/interfaces menyimpan parameter IP statis atau dhcp pada sistem Debian."
+    },
+    {
+      "soal": "Perintah apa yang digunakan untuk merestart layanan jaringan pada Debian?",
+      "pilihan": [
+        "systemctl restart network-manager",
+        "systemctl restart networking",
+        "service network restart",
+        "ifconfig restart"
+      ],
+      "jawabanIndex": 1,
+      "penjelasan": "Perintah systemctl restart networking digunakan agar perubahan pada file konfigurasi jaringan segera diterapkan tanpa reboot."
+    },
+    {
+      "soal": "Apa fungsi dari perintah 'systemctl status isc-dhcp-server'?",
+      "pilihan": [
+        "Melihat kapasitas harddisk",
+        "Melihat status proses atau layanan",
+        "Mengubah hak akses file",
+        "Membuat direktori baru"
+      ],
+      "jawabanIndex": 1,
+      "penjelasan": "Perintah systemctl status digunakan untuk memeriksa apakah suatu service atau layanan sedang aktif, berhenti, atau error."
+    }
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_isFinished ? "Hasil Kuis Teori" : "Kuis Pilihan Ganda"),
+        backgroundColor: Colors.orangeAccent,
+        foregroundColor: Colors.white,
+      ),
+      body: _isFinished ? _buildResultView() : _buildQuizView(),
+    );
+  }
+
+  Widget _buildQuizView() {
+    var currentQuestion = _quizQuestions[_activeQuestionIndex];
+
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Progress
+          LinearProgressIndicator(
+            value: (_activeQuestionIndex + 1) / _quizQuestions.length,
+            backgroundColor: Colors.grey[200],
+            color: Colors.orangeAccent,
+          ),
+          const SizedBox(height: 20),
+
+          // Soal
+          Text(
+            "Soal ${_activeQuestionIndex + 1} dari ${_quizQuestions.length}",
+            style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            currentQuestion["soal"],
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 20),
+
+          // Pilihan Jawaban
+          ...List.generate(
+            (currentQuestion["pilihan"] as List).length,
+            (index) {
+              bool isSelected = _selectedAnswerIndex == index;
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: isSelected ? Colors.orange.shade50 : Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: isSelected ? Colors.orangeAccent : Colors.grey.shade300,
+                    width: isSelected ? 2 : 1,
+                  ),
+                ),
+                child: ListTile(
+                  title: Text(currentQuestion["pilihan"][index]),
+                  leading: Radio<int>(
+                    value: index,
+                    groupValue: _selectedAnswerIndex,
+                    activeColor: Colors.orangeAccent,
+                    onChanged: (val) {
+                      setState(() {
+                        _selectedAnswerIndex = val;
+                      });
+                    },
+                  ),
+                  onTap: () {
+                    setState(() {
+                      _selectedAnswerIndex = index;
+                    });
+                  },
+                ),
+              );
+            }
+          ),
+
+          const Spacer(),
+
+          // Tombol Next / Selesai
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orangeAccent,
+              minimumSize: const Size(double.infinity, 55),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: _selectedAnswerIndex == null
+                ? null
+                : () {
+                    if (_selectedAnswerIndex == currentQuestion["jawabanIndex"]) {
+                      _score += 20;
+                    }
+
+                    if (_activeQuestionIndex < _quizQuestions.length - 1) {
+                      setState(() {
+                        _activeQuestionIndex++;
+                        _selectedAnswerIndex = null;
+                      });
+                    } else {
+                      setState(() {
+                        _isFinished = true;
+                      });
+                    }
+                  },
+            child: Text(
+              _activeQuestionIndex < _quizQuestions.length - 1 ? "SOAL BERIKUTNYA" : "SELESAI",
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResultView() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.military_tech, size: 120, color: Colors.orange),
+          const Text("TOTAL SKOR", style: TextStyle(fontSize: 16, color: Colors.grey)),
+          Text(
+            "$_score", 
+            style: const TextStyle(fontSize: 80, fontWeight: FontWeight.bold, color: Colors.orangeAccent)
+          ),
+          const SizedBox(height: 40),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orangeAccent,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(context),
+            child: const Text("KEMBALI KE HOME"),
+          ),
+          TextButton(
+            onPressed: () => setState(() {
+              _isFinished = false;
+              _score = 0;
+              _activeQuestionIndex = 0;
+              _selectedAnswerIndex = null;
+            }),
+            child: const Text("COBA LAGI", style: TextStyle(color: Colors.orangeAccent)),
+          )
+        ],
+      ),
+    );
+  }
+}

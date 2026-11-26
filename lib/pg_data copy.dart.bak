@@ -1,0 +1,159 @@
+final List<Map<String, dynamic>> pgData = [
+  {
+    "soal": "Untuk mengisolasi jaringan virtual antara komputer host dan mesin virtual pada VirtualBox secara aman, adaptor jaringan apa yang paling sesuai untuk digunakan?",
+    "pilihan": [
+      "NAT Network",
+      "Bridged Adapter",
+      "VirtualBox Host-Only Ethernet Adapter",
+      "Internal Network"
+    ],
+    "jawabanIndex": 2,
+  },
+  {
+    "soal": "Pada tahap pemilihan perangkat lunak saat instalasi Debian 12, langkah apa yang tepat untuk membuat instalasi berbasis CLI murni?",
+    "pilihan": [
+      "Mengaktifkan SSH server dan web server",
+      "Menambahkan desktop environment tambahan",
+      "Menghapus pilihan Gnome dan desktop environtment",
+      "Memilih utilitas sistem standar saja"
+    ],
+    "jawabanIndex": 2,
+  },
+  {
+    "soal": "Ketika melakukan instalasi Debian, di manakah letak partisi yang benar untuk memasang lokasi GRUB boot loader pada harddisk utama?",
+    "pilihan": [
+      "/dev/sdb",
+      "/dev/loop0",
+      "/dev/sda",
+      "/dev/ram0"
+    ],
+    "jawabanIndex": 2,
+  },
+  {
+    "soal": "Kombinasi pengaturan jaringan (adapter) mana pada VirtualBox yang digunakan untuk  memberikan akses internet ke mesin virtual?",
+    "pilihan": [
+      "Host-Only dan Internal Network",
+      "Bridge dan NAT untuk akses internet Virtualbox",
+      "NAT dan Internal Network",
+      "Bridged Adapter dan Host-Only"
+    ],
+    "jawabanIndex": 1,
+  },
+  {
+    "soal": "Tipe partisi apa saja yang secara otomatis dibuat oleh sistem saat proses partisi otomatis (guided partitioning) Debian 12?",
+    "pilihan": [
+      "NTFS dan FAT32",
+      "BTRFS dan Cache",
+      "XFS dan Ext3",
+      "ext4 dan swap "
+    ],
+    "jawabanIndex": 3,
+  }
+];
+
+final List<Map<String, dynamic>> pgDataBab2 = [
+  {
+    "soal": "Sistem operasi memiliki empat fungsi utama secara umum. Salah satu fungsinya adalah...",
+    "pilihan": [
+      "Membuat desain grafis 3 dimensi",
+      "Pengendalian akses terhadap berbagai perangkat keras yang terhubung ke komputer",
+      "Menghubungkan komputer ke jaringan nirkabel secara otomatis",
+      "Mengunduh file dari internet tanpa menggunakan browser"
+    ],
+    "jawabanIndex": 1,
+  },
+  {
+    "soal": "Pada persiapan instalasi Debian 12 menggunakan VirtualBox, file ISO yang dikhususkan untuk arsitektur 64-bit adalah...",
+    "pilihan": [
+      "debian-12-i386",
+      "debian-12-arm64",
+      "debian-12-amd64",
+      "debian-12-x86"
+    ],
+    "jawabanIndex": 2,
+  },
+  {
+    "soal": "Fungsi dari 'Unattended installation' saat membuat mesin virtual baru di VirtualBox adalah untuk...",
+    "pilihan": [
+      "Melewati parameter konfigurasi awal instalasi hingga proses pembuatan GRUB selesai",
+      "Meningkatkan kapasitas memori (RAM) secara otomatis",
+      "Menghubungkan jaringan secara langsung ke internet",
+      "Membuat partisi harddisk menggunakan antarmuka grafis"
+    ],
+    "jawabanIndex": 0,
+  },
+  {
+    "soal": "Sebelum memulai simulasi instalasi Debian 12, mengapa kita perlu mempersiapkan virtual host adapter?",
+    "pilihan": [
+      "Untuk mempercepat kinerja prosesor atau CPU",
+      "Untuk mengisolasi jaringan virtual agar aman untuk simulasi dan komunikasi antar mesin",
+      "Untuk mengubah resolusi layar mesin virtual secara otomatis",
+      "Untuk menyimpan data file video instalasi"
+    ],
+    "jawabanIndex": 1,
+  },
+  {
+    "soal": "Perintah yang digunakan untuk menginstal paket DHCP server pada sistem operasi Debian adalah...",
+    "pilihan": [
+      "sudo apt-get install isc-dhcp-server",
+      "sudo apt-get install apache2",
+      "sudo apt-get install vsftpd",
+      "sudo apt-get install bind9"
+    ],
+    "jawabanIndex": 0,
+  }
+];
+
+// Kumpulan soal untuk Bab 3 (indeks 10)
+final List<Map<String, dynamic>> pgDataBab3 = [
+  {
+    "soal": "Untuk mengisolasi jaringan virtual antara komputer host dan mesin virtual pada VirtualBox secara aman, adaptor jaringan apa yang paling sesuai untuk digunakan?",
+    "pilihan": [
+      "NAT Network",
+      "Bridged Adapter",
+      "VirtualBox Host-Only Ethernet Adapter",
+      "Internal Network"
+    ],
+    "jawabanIndex": 2,
+  },
+  {
+    "soal": "Pada tahap pemilihan perangkat lunak saat instalasi Debian 12, langkah apa yang tepat untuk membuat instalasi berbasis CLI murni?",
+    "pilihan": [
+      "Mengaktifkan SSH server dan web server",
+      "Menambahkan desktop environment tambahan",
+      "Menghapus pilihan Gnome dan desktop environtment buat instalasi CLI",
+      "Memilih utilitas sistem standar saja"
+    ],
+    "jawabanIndex": 2,
+  },
+  {
+    "soal": "Ketika melakukan instalasi Debian, di manakah letak partisi yang benar untuk memasang lokasi GRUB boot loader pada harddisk utama?",
+    "pilihan": [
+      "/dev/sdb",
+      "/dev/loop0",
+      "/dev/sda",
+      "/dev/ram0"
+    ],
+    "jawabanIndex": 2,
+  },
+  {
+    "soal": "Kombinasi pengaturan jaringan (adapter) mana pada VirtualBox yang digunakan untuk mengisolasi sekaligus memberikan akses internet ke mesin virtual?",
+    "pilihan": [
+      "Host-Only dan Internal Network",
+      "Bridge dan NAT untuk akses internet Virtualbox",
+      "NAT dan Internal Network",
+      "Bridged Adapter dan Host-Only"
+    ],
+    "jawabanIndex": 1,
+  },
+  {
+    "soal": "Tipe partisi apa saja yang secara otomatis dibuat oleh sistem saat proses partisi otomatis (guided partitioning) Debian 12?",
+    "pilihan": [
+      "NTFS dan FAT32",
+      "BTRFS dan Cache",
+      "XFS dan Ext3",
+      "ext4 dan swap pada pembuatan partisi otomatis debian 12"
+    ],
+    "jawabanIndex": 3,
+  }
+];

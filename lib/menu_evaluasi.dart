@@ -1,0 +1,117 @@
+import 'package:flutter/material.dart';
+import 'cli.dart'; // Pastikan import ke file Simulasi CLI Anda sesuai
+import 'kuis_pg_page.dart';
+
+class EvaluasiPage extends StatelessWidget {
+  const EvaluasiPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    const Color primaryColor = Color(0xFF1B8EDB);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Evaluasi Mandiri", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: primaryColor,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Pilih Jenis Latihan",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              "Uji kemampuanmu setelah mempelajari materi Administrasi Sistem Jaringan.",
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 30),
+            
+            // Pilihan 1: Pilihan Ganda
+            _buildMenuCard(
+              context,
+              title: "Pilihan Ganda",
+              subtitle: "Latihan soal teori dengan 4 pilihan jawaban.",
+              icon: Icons.quiz_rounded,
+              color: Colors.orangeAccent,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const KuisPGPage()), // Tidak error lagi
+                );
+              },
+            ),
+            
+            const SizedBox(height: 20),
+            
+            // Pilihan 2: Command Prompt (CLI)
+            _buildMenuCard(
+              context,
+              title: "Simulasi CLI",
+              subtitle: "Latihan perintah Linux melalui terminal interaktif.",
+              icon: Icons.terminal_rounded,
+              color: Colors.teal,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  // Mengarahkan ke CLIPage
+                  MaterialPageRoute(builder: (context) => const CLIPage()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuCard(BuildContext context, 
+      {required String title, required String subtitle, required IconData icon, required Color color, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withOpacity(0.5), width: 2),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Icon(icon, color: Colors.white, size: 30),
+            ),
+            const SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    subtitle,
+                    style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey),
+          ],
+        ),
+      ),
+    );
+  }
+}

@@ -1,0 +1,263 @@
+import 'package:flutter/material.dart';
+import 'dart:math';
+import 'splash_sceen.dart'; // Pastikan typo 'splash_sceen
+import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
+import 'profil_page.dart';
+import 'evaluasi.dart.bak';
+import 'ebook.dart';
+import 'cp.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'SAJ_TJKT_11',
+      theme: ThemeData(useMaterial3: true),
+      home: const SplashScreen(),
+    );
+  }
+}
+
+class WorkbenchSAI extends StatefulWidget {
+  const WorkbenchSAI({super.key});
+
+  @override
+  State<WorkbenchSAI> createState() => _WorkbenchSAIState();
+}
+
+class _WorkbenchSAIState extends State<WorkbenchSAI>
+    with TickerProviderStateMixin {
+  late AnimationController _ballController;
+  late AnimationController _menuController;
+  List<Ball> balls = [];
+  final Random _random = Random();
+
+  @override
+  void initState() {
+    super.initState();
+
+    final radii = [20.0, 40.0, 60.0];
+    for (int i = 0; i < 12; i++) {
+      balls.add(
+        Ball(
+          color: Colors.primaries[_random.nextInt(Colors.primaries.length)]
+              .withOpacity(0.5),
+          radius: radii[_random.nextInt(3)],
+          pos: Offset(_random.nextDouble() * 300, _random.nextDouble() * 600),
+          vel: Offset(
+            (_random.nextDouble() * 4) - 2,
+            (_random.nextDouble() * 4) - 2,
+          ),
+        ),
+      );
+    }
+
+    _ballController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 16),
+    )
+      ..addListener(() {
+        setState(() {
+          for (var ball in balls) {
+            ball.update(MediaQuery.of(context).size);
+          }
+        });
+      })
+      ..repeat();
+
+    _menuController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _menuController.forward(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ballController.dispose();
+    _menuController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          CustomPaint(
+            painter: BallPainter(balls: balls),
+            child: Container(),
+          ),
+          Column(
+            children: [
+              Expanded(
+                flex: 2,
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 27, 142, 219).withOpacity(0.97),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Colors.white.withOpacity(0.2),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: const Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      'SISTEM ADMINISTRASI JARINGAN',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 20,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 25,
+                    vertical: 40,
+                  ),
+                  child: Column(
+                    children: [
+                      _buildAnimatedButton(
+                        0,
+                        Icons.school,
+                        "Capaian Pembelajaran",
+                      ),
+                      _buildAnimatedButton(1, Icons.book, "Materi"),
+                      _buildAnimatedButton(
+                        2,
+                        Icons.assignment_turned_in,
+                        "Tugas",
+                      ),
+                      _buildAnimatedButton(3, Icons.person, "Profil Penulis"),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAnimatedButton(int index, IconData icon, String label) {
+    final animation = CurvedAnimation(
+      parent: _menuController,
+      curve: Interval(
+        (0.1 * index).clamp(0.0, 1.0),
+        (0.6 + (0.1 * index)).clamp(0.0, 1.0),
+        curve: Curves.easeOutBack,
+      ),
+    );
+
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, 100 * (1 - animation.value)),
+          child: Opacity(
+            opacity: animation.value.clamp(0.0, 1.0),
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 65),
+                  backgroundColor: Colors.blueAccent.withValues(alpha: 0.89),
+                  foregroundColor: Colors.white,
+                  elevation: 5,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+                onPressed: () {
+                  // --- LOGIKA NAVIGASI TOMBOL ---
+                  if (label == "Capaian Pembelajaran") {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const CPPage()),
+                    );
+                  } else if (label == "Materi") {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const EbookPage()),
+                    );
+                  } else if (label == "Tugas") {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const EvaluasiPage()),
+                    );
+                  } else if (label == "Profil Penulis") {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ProfilPage()),
+                    );
+                  }
+                },
+                icon: Icon(icon, size: 28),
+                label: Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// Model & Painter tetap sama seperti kode aslimu
+class Ball {
+  Color color;
+  double radius;
+  Offset pos;
+  Offset vel;
+  Ball({required this.color, required this.radius, required this.pos, required this.vel});
+
+  void update(Size size) {
+    pos += vel;
+    if (pos.dx <= radius || pos.dx >= size.width - radius) vel = Offset(-vel.dx, vel.dy);
+    if (pos.dy <= radius || pos.dy >= size.height - radius) vel = Offset(vel.dx, -vel.dy);
+  }
+}
+
+class BallPainter extends CustomPainter {
+  final List<Ball> balls;
+  BallPainter({required this.balls});
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..style = PaintingStyle.fill;
+    for (var ball in balls) {
+      paint.color = ball.color;
+      canvas.drawCircle(ball.pos, ball.radius, paint);
+    }
+  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}

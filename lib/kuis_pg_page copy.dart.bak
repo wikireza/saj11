@@ -1,0 +1,172 @@
+import 'package:flutter/material.dart';
+import 'pg_data.dart'; // Pastikan path file benar dan sesuai dengan project
+
+class KuisPGPage extends StatefulWidget {
+  final List<Map<String, dynamic>> quizQuestions;
+
+  const KuisPGPage({super.key, required this.quizQuestions});
+
+  @override
+  State<KuisPGPage> createState() => _KuisPGPageState();
+}
+
+class _KuisPGPageState extends State<KuisPGPage> {
+  int _activeQuestionIndex = 0;
+  int _score = 0;
+  int? _selectedAnswerIndex;
+  bool _isFinished = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_isFinished ? "Hasil Kuis Teori" : "Kuis Pilihan Ganda"),
+        backgroundColor: Colors.orangeAccent,
+        foregroundColor: Colors.white,
+      ),
+      body: widget.quizQuestions.isEmpty
+          ? const Center(child: Text("Tidak ada soal untuk bab ini."))
+          : (_isFinished ? _buildResultView() : _buildQuizView()),
+    );
+  }
+
+  Widget _buildQuizView() {
+    var currentQuestion = widget.quizQuestions[_activeQuestionIndex];
+    var pilihan = (currentQuestion["pilihan"] as List?) ?? [];
+
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Progress
+          LinearProgressIndicator(
+            value: (_activeQuestionIndex + 1) / widget.quizQuestions.length,
+            backgroundColor: Colors.grey[200],
+            color: Colors.orangeAccent,
+          ),
+          const SizedBox(height: 20),
+
+          // Soal
+          Text(
+            "Soal ${_activeQuestionIndex + 1} dari ${widget.quizQuestions.length}",
+            style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            currentQuestion["soal"] ?? '',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 20),
+
+          // Pilihan Jawaban
+          Expanded(
+            child: ListView.builder(
+              itemCount: pilihan.length,
+              itemBuilder: (context, index) {
+                bool isSelected = _selectedAnswerIndex == index;
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: isSelected ? Colors.orange.shade50 : Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isSelected ? Colors.orangeAccent : Colors.grey.shade300,
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: ListTile(
+                    title: Text(pilihan[index].toString()),
+                    leading: Radio<int>(
+                      value: index,
+                      groupValue: _selectedAnswerIndex,
+                      activeColor: Colors.orangeAccent,
+                      onChanged: (val) {
+                        setState(() {
+                          _selectedAnswerIndex = val;
+                        });
+                      },
+                    ),
+                    onTap: () {
+                      setState(() {
+                        _selectedAnswerIndex = index;
+                      });
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          // Tombol Next / Selesai
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orangeAccent,
+              minimumSize: const Size(double.infinity, 55),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: _selectedAnswerIndex == null
+                ? null
+                : () {
+                    if (_selectedAnswerIndex == currentQuestion["jawabanIndex"]) {
+                      int points = (100 / widget.quizQuestions.length).round();
+                      _score += points;
+                    }
+
+                    if (_activeQuestionIndex < widget.quizQuestions.length - 1) {
+                      setState(() {
+                        _activeQuestionIndex++;
+                        _selectedAnswerIndex = null;
+                      });
+                    } else {
+                      setState(() {
+                        _isFinished = true;
+                      });
+                    }
+                  },
+            child: Text(
+              _activeQuestionIndex < widget.quizQuestions.length - 1 ? "SOAL BERIKUTNYA" : "SELESAI",
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResultView() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.military_tech, size: 120, color: Colors.orange),
+          const Text("TOTAL SKOR", style: TextStyle(fontSize: 16, color: Colors.grey)),
+          Text(
+            "$_score", 
+            style: const TextStyle(fontSize: 80, fontWeight: FontWeight.bold, color: Colors.orangeAccent)
+          ),
+          const SizedBox(height: 40),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orangeAccent,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(context),
+            child: const Text("KEMBALI KE HOME"),
+          ),
+          TextButton(
+            onPressed: () => setState(() {
+              _isFinished = false;
+              _score = 0;
+              _activeQuestionIndex = 0;
+              _selectedAnswerIndex = null;
+            }),
+            child: const Text("COBA LAGI", style: TextStyle(color: Colors.orangeAccent)),
+          )
+        ],
+      ),
+    );
+  }
+}
