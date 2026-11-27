@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import 'materi_data.dart';
-import 'package:chewie/chewie.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'kuis_pg_page.dart';
@@ -756,6 +755,76 @@ class _EbookPageState extends State<EbookPage> {
     return "Materi"; // Nilai default jika tidak ada bab di atasnya
   }
 
+  // ─── Helper: deteksi apakah teks adalah baris perintah terminal ───────────
+  bool _isCommandText(String text) {
+    if (text.contains('/i')) return false; // ada markup italic → bukan command
+    if (RegExp(r'^\d+\.\s').hasMatch(text))
+      return false; // dimulai angka → bukan command
+    final commandPrefixes = [
+      'sudo ', 'apt ', 'nano ', 'ping ', 'ip ', 'net ', 'samba', 'testparm',
+      'systemctl', 'mkdir', 'chown', 'chmod', 'cp ', 'mv ', 'rm ', 'cat ',
+      'echo ', 'grep ', 'ls ', 'cd ', 'service ', 'ifconfig', 'route',
+      'dhclient', 'hostnamectl', 'reboot', 'shutdown', 'passwd', 'useradd',
+      'groupadd', 'iptables', 'ufw', 'curl ', 'wget ', 'tar ', 'unzip',
+      'named', 'bind9', 'apache2', 'nginx', 'mysql', 'python', 'git ',
+      'subnet ', 'INTERFACESv4=', '[SharedFolder]',
+      r'\\', // path UNC Windows
+    ];
+    final trimmed = text.trim();
+    return commandPrefixes.any((p) => trimmed.startsWith(p));
+  }
+
+  // ─── Widget: tampilkan baris perintah dengan kotak + tombol copy ───────────
+  Widget _buildCommandBox(String command) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: _isDarkMode
+              ? const Color(0xFF1A1A2E)
+              : const Color(0xFF1E293B),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: _isDarkMode
+                ? Colors.blue.shade900
+                : Colors.blueGrey.shade700,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 12, right: 8),
+              child: Icon(
+                Icons.terminal,
+                size: 14,
+                color: Colors.green.shade400,
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: SelectableText(
+                  command.trim(),
+                  style: const TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 14,
+                    color: Color(0xFF7DD3FC),
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ),
+            // Tombol Copy
+            _CopyButton(text: command.trim()),
+          ],
+        ),
+      ),
+    );
+  }
+
   //parser buat teks italic dengan format /i.../i
   List<TextSpan> _buildSpansWithItalic(
     BuildContext context,
@@ -836,42 +905,44 @@ class _EbookPageState extends State<EbookPage> {
           color: _isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Judul Istilah (Warna biru agar kontras di kedua mode)
-              Text(
-                judul,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: _isDarkMode ? Colors.blue[300] : Colors.blue[800],
-                ),
-              ),
-              const SizedBox(height: 15),
-
-              // Definisi dengan pendeteksi warna otomatis
-              RichText(
-                textAlign: TextAlign.justify,
-                text: TextSpan(
-                  children: _buildSpansWithItalic(
-                    context,
-                    arti,
-                    TextStyle(
-                      fontSize: 16,
-                      height: 1.5,
-                      // KUNCI PERBAIKAN: Jika dark mode pakai putih, jika light pakai hitam
-                      color: _isDarkMode ? Colors.white : Colors.black87,
-                    ),
-                    _isDarkMode ? Colors.white : Colors.black,
-                    isInsidePopup: true,
+        child: SelectionArea(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Judul Istilah (Warna biru agar kontras di kedua mode)
+                Text(
+                  judul,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: _isDarkMode ? Colors.blue[300] : Colors.blue[800],
                   ),
                 ),
-              ),
-              const SizedBox(height: 25),
-            ],
+                const SizedBox(height: 15),
+
+                // Definisi dengan pendeteksi warna otomatis
+                Text.rich(
+                  TextSpan(
+                    children: _buildSpansWithItalic(
+                      context,
+                      arti,
+                      TextStyle(
+                        fontSize: 16,
+                        height: 1.5,
+                        // KUNCI PERBAIKAN: Jika dark mode pakai putih, jika light pakai hitam
+                        color: _isDarkMode ? Colors.white : Colors.black87,
+                      ),
+                      _isDarkMode ? Colors.white : Colors.black,
+                      isInsidePopup: true,
+                    ),
+                  ),
+                  textAlign: TextAlign.justify,
+                ),
+                const SizedBox(height: 25),
+              ],
+            ),
           ),
         ),
       ),
@@ -1332,214 +1403,232 @@ class _EbookPageState extends State<EbookPage> {
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   clipBehavior: Clip.hardEdge,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children:
-                        (data["elements"] as List<dynamic>?)?.map((item) {
-                          if (item["type"] == "shortcut_kuis") {
-                            // Ambil index kuis langsung dari data element materi_data.dart, fallback ke 0 jika tidak ada
-                            final int quizIndex = item["quizIndex"] ?? 0;
+                  child: SelectionArea(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children:
+                          (data["elements"] as List<dynamic>?)?.map((item) {
+                            if (item["type"] == "shortcut_kuis") {
+                              // Ambil index kuis langsung dari data element materi_data.dart, fallback ke 0 jika tidak ada
+                              final int quizIndex = item["quizIndex"] ?? 0;
 
-                            return Container(
-                              margin: const EdgeInsets.symmetric(vertical: 20),
-                              width: double.infinity,
-                              child: ElevatedButton.icon(
-                                onPressed: () {
-                                  // Pengecekan keamanan untuk memastikan data kuis ada di pg_data.dart
-                                  if (QuizData.soalKuis.containsKey(
-                                    quizIndex,
-                                  )) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            KuisPGPage(modulIndex: quizIndex),
-                                      ),
-                                    );
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Kuis untuk bab ini belum tersedia.',
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                },
-                                icon: const Icon(
-                                  Icons.assignment_turned_in,
-                                  color: Colors.white,
+                              return Container(
+                                margin: const EdgeInsets.symmetric(
+                                  vertical: 20,
                                 ),
-                                label: const Text(
-                                  "Uji Pemahaman: Latihan Pilihan Ganda",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orangeAccent,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 15,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  elevation: 3,
-                                ),
-                              ),
-                            );
-                          }
-
-                          if (item["type"] == "h2") {
-                            return Padding(
-                              padding: const EdgeInsets.only(
-                                top: 10,
-                                bottom: 10,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  RichText(
-                                    text: TextSpan(
-                                      children: _buildSpansWithItalic(
-                                        context, // <-- TAMBAHKAN INI DI URUTAN PERTAMA
-                                        item["value"],
-                                        TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: _isDarkMode
-                                              ? Colors.blue[200]
-                                              : Colors.blueGrey[800],
-                                          letterSpacing: 0.5,
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  onPressed: () {
+                                    // Pengecekan keamanan untuk memastikan data kuis ada di pg_data.dart
+                                    if (QuizData.soalKuis.containsKey(
+                                      quizIndex,
+                                    )) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              KuisPGPage(modulIndex: quizIndex),
                                         ),
-                                        titleColor,
-                                        disableKamus: true,
-                                      ),
-                                    ),
-                                  ),
-                                  Container(
-                                    margin: const EdgeInsets.only(top: 4),
-                                    height: 2,
-                                    width: 40,
-                                    color: titleColor,
-                                  ),
-                                ],
-                              ),
-                            );
-                          } else if (item["type"] == "text") {
-                            String text = item["value"];
-
-                            // 1. Definisikan RegExp dan 'match' di sini
-                            RegExp regExp = RegExp(r'^(\d+\.\s)');
-                            Match? match = regExp.firstMatch(text);
-
-                            if (match != null) {
-                              // 2. Definisikan 'leadingNumber' dan 'remainingText' di dalam blok if
-                              String leadingNumber = match.group(0)!;
-                              String remainingText = text.substring(
-                                leadingNumber.length,
-                              );
-
-                              return Padding(
-                                // 3. Pastikan parameter 'padding' ditambahkan
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(
-                                      width: 25,
-                                      child: Text(
-                                        leadingNumber,
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: titleColor,
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: RichText(
-                                        textAlign: TextAlign.justify,
-                                        text: TextSpan(
-                                          children: _buildSpansWithItalic(
-                                            context,
-                                            remainingText,
-                                            TextStyle(
-                                              fontSize: 16,
-                                              height: 1.6,
-                                              color: textColor,
-                                            ),
-                                            titleColor,
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Kuis untuk bab ini belum tersedia.',
                                           ),
                                         ),
+                                      );
+                                    }
+                                  },
+                                  icon: const Icon(
+                                    Icons.assignment_turned_in,
+                                    color: Colors.white,
+                                  ),
+                                  label: const Text(
+                                    "Uji Pemahaman: Latihan Pilihan Ganda",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.orangeAccent,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 15,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    elevation: 3,
+                                  ),
+                                ),
+                              );
+                            }
+
+                            if (item["type"] == "command") {
+                              return _buildCommandBox(
+                                (item["value"] ?? "").toString(),
+                              );
+                            }
+
+                            if (item["type"] == "h2") {
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 10,
+                                  bottom: 10,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text.rich(
+                                      TextSpan(
+                                        children: _buildSpansWithItalic(
+                                          context, // <-- TAMBAHKAN INI DI URUTAN PERTAMA
+                                          item["value"],
+                                          TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: _isDarkMode
+                                                ? Colors.blue[200]
+                                                : Colors.blueGrey[800],
+                                            letterSpacing: 0.5,
+                                          ),
+                                          titleColor,
+                                          disableKamus: true,
+                                        ),
                                       ),
+                                    ),
+                                    Container(
+                                      margin: const EdgeInsets.only(top: 4),
+                                      height: 2,
+                                      width: 40,
+                                      color: titleColor,
                                     ),
                                   ],
                                 ),
                               );
-                            } else {
-                              // JIKA TIDAK ADA NOMOR (PARAGRAF BIASA)
+                            } else if (item["type"] == "text") {
+                              String text = item["value"];
+
+                              // Deteksi baris perintah terminal → tampilkan command box
+                              if (_isCommandText(text)) {
+                                return _buildCommandBox(text);
+                              }
+
+                              // 1. Definisikan RegExp dan 'match' di sini
+                              RegExp regExp = RegExp(r'^(\d+\.\s)');
+                              Match? match = regExp.firstMatch(text);
+
+                              if (match != null) {
+                                // 2. Definisikan 'leadingNumber' dan 'remainingText' di dalam blok if
+                                String leadingNumber = match.group(0)!;
+                                String remainingText = text.substring(
+                                  leadingNumber.length,
+                                );
+
+                                return Padding(
+                                  // 3. Pastikan parameter 'padding' ditambahkan
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(
+                                        width: 25,
+                                        child: Text(
+                                          leadingNumber,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: titleColor,
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Text.rich(
+                                          TextSpan(
+                                            children: _buildSpansWithItalic(
+                                              context,
+                                              remainingText,
+                                              TextStyle(
+                                                fontSize: 16,
+                                                height: 1.6,
+                                                color: textColor,
+                                              ),
+                                              titleColor,
+                                            ),
+                                          ),
+                                          textAlign: TextAlign.justify,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              } else {
+                                // JIKA TIDAK ADA NOMOR (PARAGRAF BIASA)
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 15),
+                                  child: Text.rich(
+                                    TextSpan(
+                                      children: _buildSpansWithItalic(
+                                        context,
+                                        text,
+                                        TextStyle(
+                                          fontSize: 16,
+                                          height: 1.6,
+                                          color: textColor,
+                                        ),
+                                        titleColor,
+                                      ),
+                                    ),
+                                    textAlign: TextAlign.justify,
+                                  ),
+                                );
+                              }
+                            } else if (item["type"] == "image") {
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 15),
-                                child: RichText(
-                                  textAlign: TextAlign.justify,
-                                  text: TextSpan(
-                                    children: _buildSpansWithItalic(
-                                      context,
-                                      text,
-                                      TextStyle(
-                                        fontSize: 16,
-                                        height: 1.6,
-                                        color: textColor,
-                                      ),
-                                      titleColor,
-                                    ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.asset(
+                                    item["value"],
+                                    fit: BoxFit.contain,
                                   ),
                                 ),
                               );
-                            }
-                          } else if (item["type"] == "image") {
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 15),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: Image.asset(
-                                  item["value"],
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                            );
-                          } else if (item["type"] == "video_asset") {
-                            return _buildLocalVideoBox(
-                              item["value"],
-                              item["thumbnail"] ?? "",
-                              (bool isScrollEnabled) {
-                                // Handle zoom state change if needed
-                              },
-                            );
-                          } else if (item["type"] == "video_youtube" ||
-                              item["type"] == "youtube") {
-                            return _buildYoutubeVideoBox(
-                              item["value"],
-                              title: item["title"],
-                            );
-                          } else if (item["type"] == "video") {
-                            final String videoUrl = (item["value"] ?? "")
-                                .toString()
-                                .toLowerCase();
-                            if (videoUrl.contains("youtube.com") ||
-                                videoUrl.contains("youtu.be")) {
+                            } else if (item["type"] == "video_asset") {
+                              return _buildLocalVideoBox(
+                                item["value"],
+                                item["thumbnail"] ?? "",
+                                (bool isScrollEnabled) {
+                                  // Handle zoom state change if needed
+                                },
+                              );
+                            } else if (item["type"] == "video_youtube" ||
+                                item["type"] == "youtube") {
                               return _buildYoutubeVideoBox(
                                 item["value"],
                                 title: item["title"],
                               );
+                            } else if (item["type"] == "video") {
+                              final String videoUrl = (item["value"] ?? "")
+                                  .toString()
+                                  .toLowerCase();
+                              if (videoUrl.contains("youtube.com") ||
+                                  videoUrl.contains("youtu.be")) {
+                                return _buildYoutubeVideoBox(
+                                  item["value"],
+                                  title: item["title"],
+                                );
+                              }
+                              return _buildVideoBox(item["value"]);
                             }
-                            return _buildVideoBox(item["value"]);
-                          }
-                          return const SizedBox.shrink();
-                        }).toList() ??
-                        [],
+                            return const SizedBox.shrink();
+                          }).toList() ??
+                          [],
+                    ),
                   ),
                 ),
               ),
@@ -1613,6 +1702,56 @@ class _EbookPageState extends State<EbookPage> {
             ),
           ),
       ],
+    );
+  }
+}
+
+// ─── Stateful widget tombol copy dengan feedback animasi ────────────────────
+class _CopyButton extends StatefulWidget {
+  final String text;
+  const _CopyButton({required this.text});
+
+  @override
+  State<_CopyButton> createState() => _CopyButtonState();
+}
+
+class _CopyButtonState extends State<_CopyButton> {
+  bool _copied = false;
+
+  void _copy() async {
+    await Clipboard.setData(ClipboardData(text: widget.text));
+    if (!mounted) return;
+    setState(() => _copied = true);
+    await Future.delayed(const Duration(seconds: 2));
+    if (mounted) setState(() => _copied = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: _copied ? 'Disalin!' : 'Salin perintah',
+      child: InkWell(
+        onTap: _copy,
+        borderRadius: const BorderRadius.only(
+          topRight: Radius.circular(8),
+          bottomRight: Radius.circular(8),
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          decoration: BoxDecoration(
+            color: _copied ? Colors.green.shade700 : const Color(0xFF334155),
+            borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(7),
+              bottomRight: Radius.circular(7),
+            ),
+          ),
+          child: Icon(
+            _copied ? Icons.check : Icons.copy,
+            size: 16,
+            color: _copied ? Colors.white : Colors.grey.shade400,
+          ),
+        ),
+      ),
     );
   }
 }

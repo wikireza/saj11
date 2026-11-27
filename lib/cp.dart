@@ -49,7 +49,7 @@ class CPPage extends StatelessWidget {
 
             _buildCPCard(
               "Elemen: Layanan Jaringan",
-              "Peserta didik mampu mengonfigurasi dan menguji layanan jaringan seperti DHCP Server, DNS Server, Web Server, dan FTP Server.",
+              "Peserta didik mampu mengonfigurasi dan menguji layanan jaringan seperti DHCP Server, DNS Server, Web Server, dan Samba Server.",
               Icons.dns_rounded,
               primaryColor,
             ),

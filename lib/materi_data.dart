@@ -1,5 +1,3 @@
-﻿import 'pg_data.dart';
-
 final Map<String, String> kamusSaj = {
   "user interface":
       "Tampilan visual yang menghubungkan pengguna dengan sistem komputer.",
@@ -432,6 +430,7 @@ final Map<int, Map<String, dynamic>> ebookData = {
         "value":
             '''1. Perbarui daftar paket repositori Debian terlebih dahulu dengan perintah /isudo apt update/i.''',
       },
+      {"type": "text", "value": '''sudo apt update'''},
       {
         "type": "text",
         "value":
@@ -444,7 +443,7 @@ final Map<int, Map<String, dynamic>> ebookData = {
     "elements": [
       {
         "type": "video_asset",
-        "value": "assets/videos/dhcp2_install.mp4",
+        "value": "assets/videos/dhcpdone.mp4",
         "isAsset": true,
       },
       {"type": "h2", "value": "Instalasi Paket isc-dhcp-server"},
@@ -457,6 +456,7 @@ final Map<int, Map<String, dynamic>> ebookData = {
         "value":
             '''1. Jalankan perintah /isudo apt install isc-dhcp-server/i untuk memasang paket utama layanan DHCP.''',
       },
+      {"type": "text", "value": '''sudo apt install isc-dhcp-server'''},
       {
         "type": "text",
         "value":
@@ -469,7 +469,7 @@ final Map<int, Map<String, dynamic>> ebookData = {
     "elements": [
       {
         "type": "video_asset",
-        "value": "assets/videos/dhcp3_interface.mp4",
+        "value": "assets/videos/dhcpdone.mp4",
         "isAsset": true,
       },
       {"type": "h2", "value": "Konfigurasi Interface Layanan DHCP"},
@@ -483,11 +483,13 @@ final Map<int, Map<String, dynamic>> ebookData = {
         "value":
             '''1. Buka file konfigurasi interface dengan perintah /isudo nano /etc/default/isc-dhcp-server/i.''',
       },
+      {"type": "text", "value": '''sudo nano /etc/default/isc-dhcp-server'''},
       {
         "type": "text",
         "value":
             '''2. Pada bagian /iINTERFACESv4/i, isikan nama interface jaringan lokal server (misalnya /iINTERFACESv4="enp0s3"/i), lalu simpan file.''',
       },
+      {"type": "text", "value": '''INTERFACESv4="enp0s3"'''},
     ],
   },
 
@@ -495,7 +497,7 @@ final Map<int, Map<String, dynamic>> ebookData = {
     "elements": [
       {
         "type": "video_asset",
-        "value": "assets/videos/dhcp4_conf.mp4",
+        "value": "assets/videos/dhcpdone.mp4",
         "isAsset": true,
       },
       {"type": "h2", "value": "Konfigurasi Subnet di File dhcpd.conf"},
@@ -509,10 +511,16 @@ final Map<int, Map<String, dynamic>> ebookData = {
         "value":
             '''1. Buka file /etc/dhcp/dhcpd.conf menggunakan editor /inano/i (/isudo nano /etc/dhcp/dhcpd.conf/i).''',
       },
+      {"type": "text", "value": '''sudo nano /etc/dhcp/dhcpd.conf'''},
       {
         "type": "text",
         "value":
-            '''2. Tambahkan atau sesuaikan blok /isubnet/i sesuai kebutuhan jaringan, misalnya:\nsubnet 192.168.100.0 netmask 255.255.255.0 {\n  range 192.168.100.10 192.168.100.50;\n  option routers 192.168.100.1;\n}''',
+            '''2. Tambahkan atau sesuaikan blok /isubnet/i sesuai kebutuhan jaringan, misalnya:''',
+      },
+      {
+        "type": "text",
+        "value":
+            "subnet 192.168.100.0 netmask 255.255.255.0 {\n  range 192.168.100.10 192.168.100.50;\n  option routers 192.168.100.1;\n}",
       },
       {
         "type": "text",
@@ -525,7 +533,7 @@ final Map<int, Map<String, dynamic>> ebookData = {
     "elements": [
       {
         "type": "video_asset",
-        "value": "assets/videos/dhcp5_test.mp4",
+        "value": "assets/videos/dhcpdone.mp4",
         "isAsset": true,
       },
       {"type": "h2", "value": "Restart & Pengujian Layanan DHCP Server"},
@@ -539,11 +547,13 @@ final Map<int, Map<String, dynamic>> ebookData = {
         "value":
             '''1. Restart layanan DHCP Server dengan perintah /isudo systemctl restart isc-dhcp-server/i.''',
       },
+      {"type": "text", "value": '''sudo systemctl restart isc-dhcp-server'''},
       {
         "type": "text",
         "value":
             '''2. Verifikasi status layanan dengan perintah /isudo systemctl status isc-dhcp-server/i untuk memastikan statusnya /iactive (running)/i tanpa error.''',
       },
+      {"type": "text", "value": '''sudo systemctl status isc-dhcp-server'''},
       {
         "type": "text",
         "value":
@@ -619,7 +629,10 @@ final Map<int, Map<String, dynamic>> ebookData = {
         "value":
             '''Pastikan terdapat IP statis, contoh: /i192.168.100.1/i dengan netmask /i255.255.255.0/i. Jika belum ada, atur IP statis terlebih dahulu melalui /inano /etc/network/interfaces/i.''',
       },
-      {"type": "h2", "value": "Langkah 2 — Cek Koneksi antara VM dan Klien Windows"},
+      {
+        "type": "h2",
+        "value": "Langkah 2 — Cek Koneksi antara VM dan Klien Windows",
+      },
       {
         "type": "text",
         "value":
@@ -636,7 +649,10 @@ final Map<int, Map<String, dynamic>> ebookData = {
 
   19: {
     "elements": [
-      {"type": "h2", "value": "Langkah 3 — Update & Upgrade Sistem di VM Debian 12"},
+      {
+        "type": "h2",
+        "value": "Langkah 3 — Update & Upgrade Sistem di VM Debian 12",
+      },
       {
         "type": "text",
         "value":
@@ -654,7 +670,10 @@ final Map<int, Map<String, dynamic>> ebookData = {
         "value":
             '''Setelah sistem diperbarui, instal /iSamba/i beserta paket pendukungnya:''',
       },
-      {"type": "text", "value": '''sudo apt install samba samba-common-bin -y'''},
+      {
+        "type": "text",
+        "value": '''sudo apt install samba samba-common-bin -y''',
+      },
       {
         "type": "text",
         "value":
@@ -667,7 +686,7 @@ final Map<int, Map<String, dynamic>> ebookData = {
     "elements": [
       {
         "type": "video_youtube",
-        "value": "https://youtu.be/dGjvx04-hlc?t=27",
+        "value": "https://youtu.be/FEnKbzf5psA?t=27",
         "title": "Tutorial Instalasi Samba Server di Debian",
       },
       {"type": "h2", "value": "Langkah 5 — Cek Versi Samba"},
@@ -711,7 +730,10 @@ final Map<int, Map<String, dynamic>> ebookData = {
         "value":
             '''Sebelum mengedit, selalu buat cadangan file /ismb.conf/i untuk mencegah kehilangan konfigurasi jika terjadi kesalahan:''',
       },
-      {"type": "text", "value": '''sudo cp /etc/samba/smb.conf /etc/samba/smb.conf.bak'''},
+      {
+        "type": "text",
+        "value": '''sudo cp /etc/samba/smb.conf /etc/samba/smb.conf.bak''',
+      },
       {
         "type": "text",
         "value":
@@ -790,11 +812,13 @@ final Map<int, Map<String, dynamic>> ebookData = {
         "value":
             '''Ubah kepemilikan direktori ke akun /inobody/i agar dapat diakses oleh semua pengguna jaringan (mode /iguest/i):''',
       },
-      {"type": "text", "value": '''sudo chown nobody:nogroup /srv/samba/shared'''},
       {
         "type": "text",
-        "value":
-            '''Kemudian berikan izin akses pada direktori tersebut:''',
+        "value": '''sudo chown nobody:nogroup /srv/samba/shared''',
+      },
+      {
+        "type": "text",
+        "value": '''Kemudian berikan izin akses pada direktori tersebut:''',
       },
       {"type": "text", "value": '''sudo chmod 0775 /srv/samba/shared'''},
       {
@@ -809,10 +833,13 @@ final Map<int, Map<String, dynamic>> ebookData = {
     "elements": [
       {
         "type": "video_youtube",
-        "value": "https://youtu.be/dGjvx04-hlc?t=311",
+        "value": "https://youtu.be/FEnKbzf5psA?t=311",
         "title": "Pengujian Koneksi Samba dari Windows",
       },
-      {"type": "h2", "value": "Langkah 13 — Verifikasi Konfigurasi & Restart Layanan"},
+      {
+        "type": "h2",
+        "value": "Langkah 13 — Verifikasi Konfigurasi & Restart Layanan",
+      },
       {
         "type": "text",
         "value":
@@ -831,7 +858,10 @@ final Map<int, Map<String, dynamic>> ebookData = {
         "value":
             '''Perintah /isystemctl enable/i mendaftarkan layanan ke daftar startup /isystemd/i sehingga Samba tidak perlu dijalankan manual setiap kali /iVM/i reboot.''',
       },
-      {"type": "h2", "value": "Langkah 14 — Pengujian Akses dari Klien Windows"},
+      {
+        "type": "h2",
+        "value": "Langkah 14 — Pengujian Akses dari Klien Windows",
+      },
       {
         "type": "text",
         "value":
@@ -842,6 +872,7 @@ final Map<int, Map<String, dynamic>> ebookData = {
         "value":
             '''1. Buka /iFile Explorer/i (tekan /iWindows + E/i).\n2. Ketikkan pada kolom alamat: /i\\\\192.168.100.1/i lalu tekan /iEnter/i.\n3. Jika berhasil, folder /iSharedFolder/i akan muncul dan bisa dibuka langsung.''',
       },
+      {"type": "text", "value": r'''\\192.168.100.1'''},
       {"type": "h2", "value": "Langkah 15 — Pengujian via Command Prompt"},
       {
         "type": "text",
